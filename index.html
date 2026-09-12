@@ -68,6 +68,9 @@ body.tv .blk.current .card{background:transparent;border:none;padding:0}
 body.tv .blk.current .n{width:auto;height:auto;background:none;border:none;font-size:1.8vmin;letter-spacing:.3em;color:var(--acc);justify-content:start;padding:0}
 body.tv .blk.current>div:last-child{display:grid;gap:2.4vmin}
 body.tv .foot{display:none}
+body.tv #page>section>h2{display:none}
+body.tv #bar{opacity:.25;transition:opacity .2s}
+body.tv #bar:hover{opacity:1}
 body.tv .ctl{top:3vmin;right:3vmin}
 #count{position:fixed;bottom:4vmin;right:6vmin;font-size:1.6vmin;letter-spacing:.2em;color:var(--dim);display:none;z-index:60}
 body.tv #count{display:block}
@@ -227,7 +230,8 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('click',e=>{                      // click the empty margins to advance
   if(mode!=='tv')return;
-  if(e.target.closest('#page .blk')||e.target.closest('#bar'))return;
+  const t=e.target;
+  if(t.closest('#bar')||t.closest('.ctl')||t.closest('[contenteditable="true"]'))return;
   show(e.clientX<innerWidth*0.25?i-1:i+1);
 });
 setMode(mode,false);
