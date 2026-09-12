@@ -39,33 +39,52 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92
 #bar button:hover,#bar a:hover{background:#1e252d;border-color:#39434f}
 #bar .p{color:var(--dim);font-size:12px;padding-left:6px}
 .hidden{display:none!important}
-/* TV */
-body.tv{overflow:hidden;background:#07090b}
-body.tv .wrap,body.tv #bar{display:none}
-#tv{position:fixed;inset:0;display:none;place-items:center;padding:0}
-body.tv #tv{display:grid}
-#stage{width:min(100vw,calc(100vh*16/9));height:min(100vh,calc(100vw*9/16));position:relative;display:grid;align-content:center;padding:6vmin 8vmin;gap:2.2vmin}
-#stage .s-tag{font-size:1.6vmin;letter-spacing:.3em;text-transform:uppercase;color:var(--acc)}
-#stage h1{font-size:7.4vmin;margin:0;line-height:1.02}
-#stage h2{font-size:5.4vmin;color:var(--fg);text-transform:none;letter-spacing:-.02em;margin:0;font-weight:650}
-#stage p{font-size:3vmin;color:#c6d0da;margin:0;max-width:44ch;line-height:1.4}
-#stage .big{font-size:2.6vmin}
-#stage .num{font-size:1.8vmin;color:var(--dim);position:absolute;bottom:4vmin;right:8vmin;letter-spacing:.2em}
-#stage .rule{height:2px;width:12vmin;background:var(--acc);border-radius:2px}
-#progress{position:fixed;left:0;top:0;height:3px;background:var(--acc);transition:width .25s ease}
+/* block controls */
+.blk{position:relative}
+.ctl{position:absolute;top:10px;right:10px;display:none;gap:6px;z-index:5}
+body.editing .blk:hover>.ctl{display:flex}
+.ctl button{all:unset;cursor:pointer;font-size:12px;line-height:1;padding:6px 9px;border-radius:8px;border:1px solid var(--line);background:#161c23;color:var(--dim)}
+.ctl button:hover{color:var(--fg);border-color:#3d4854;background:#1e252d}
+.ctl button.del:hover{color:var(--danger);border-color:#5a2b2b;background:#2a1414}
+#toast{position:fixed;left:50%;bottom:80px;z-index:70;transform:translateX(-50%);background:#18202a;border:1px solid var(--line);
+  color:var(--fg);padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .18s;pointer-events:none}
+#toast.on{opacity:1}
+/* ---- TV / presentation: the real blocks are shown, so they stay editable ---- */
+body.tv{background:#07090b;overflow:hidden}
+body.tv .wrap{max-width:none;padding:0}
+body.tv section,body.tv header.hero{border:none;padding:0}
+body.tv .blk{display:none}
+body.tv .blk.current{display:grid;align-content:center;position:fixed;inset:0;
+  width:min(100vw,calc(100vh*16/9));height:min(100vh,calc(100vw*9/16));margin:auto;
+  padding:7vmin 9vmin;gap:2.4vmin;background:transparent;border:none;border-radius:0;grid-template-columns:1fr}
+body.tv .blk.current h1{font-size:7.2vmin;margin:0}
+body.tv .blk.current h2{font-size:1.7vmin;letter-spacing:.3em;color:var(--acc);margin:0}
+body.tv .blk.current h3{font-size:5.4vmin;letter-spacing:-.02em;margin:0}
+body.tv .blk.current p{font-size:3vmin;max-width:44ch;line-height:1.42;margin:0;color:#c6d0da}
+body.tv .blk.current .lede{font-size:3.4vmin;max-width:40ch}
+body.tv .blk.current .kicker{font-size:2.3vmin}
+body.tv .blk.current .tag{font-size:1.7vmin;letter-spacing:.3em;padding:1vmin 1.6vmin}
+body.tv .blk.current .card{background:transparent;border:none;padding:0}
+body.tv .blk.current .n{width:auto;height:auto;background:none;border:none;font-size:1.8vmin;letter-spacing:.3em;color:var(--acc);justify-content:start;padding:0}
+body.tv .blk.current>div:last-child{display:grid;gap:2.4vmin}
+body.tv .foot{display:none}
+body.tv .ctl{top:3vmin;right:3vmin}
+#count{position:fixed;bottom:4vmin;right:6vmin;font-size:1.6vmin;letter-spacing:.2em;color:var(--dim);display:none;z-index:60}
+body.tv #count{display:block}
+#progress{position:fixed;left:0;top:0;height:3px;background:var(--acc);transition:width .25s ease;z-index:60}
 @media(max-width:640px){.step{grid-template-columns:1fr}.n{margin-bottom:4px}}
 </style>
 </head>
 <body>
 <div class="wrap" id="page">
-<header class="hero" data-slide="title">
+<header class="hero blk" data-slide="title">
   <span class="tag" data-k="tag" contenteditable>HashKey Chain · Hackathon</span>
   <h1 data-k="title" contenteditable>HSK Contract Watchdog</h1>
   <p class="lede" data-k="lede" contenteditable>An agent watches verified HashKey contracts, flags obvious issues, and does <b>not</b> publish the bug. It leaves a public caution in a registry on HSK. Only the contract <code>owner()</code> can unlock the writeup.</p>
   <p class="kicker" data-k="kicker" contenteditable>No draining. No bounty. No X/Telegram dump of the exploit.</p>
 </header>
 
-<section data-slide="scope">
+<section class="blk" data-slide="scope">
   <h2 data-k="h_scope" contenteditable>Out of scope</h2>
   <div class="card warn"><p data-k="scope" contenteditable style="margin:0;color:#e6b9b9">Stealing / rescue-drains · paid bounties · DMing guessed handles with bug details · painting a banner onto Blockscout · full audits · extra vuln-class theater.</p></div>
 </section>
@@ -73,18 +92,18 @@ body.tv #tv{display:grid}
 <section>
   <h2 data-k="h_steps" contenteditable>How it works</h2>
   <div class="steps" id="steps">
-    <div class="step" data-slide="step"><div class="n">1</div><div><h3 data-k="s1t" contenteditable>Watch</h3><p data-k="s1b" contenteditable>Agent polls HSK Blockscout for newly verified contracts. For each one it notes deployer, <code>owner()</code>, proxy implementation, and obvious bytecode clones of known tokens.</p></div></div>
-    <div class="step" data-slide="step"><div class="n">2</div><div><h3 data-k="s2t" contenteditable>Check</h3><p data-k="s2b" contenteditable>A few automatic, checkable rules on source — missing access control, <code>tx.origin</code>, unlocked <code>selfdestruct</code>. Not a real audit. Flag or skip.</p></div></div>
-    <div class="step" data-slide="step"><div class="n">3</div><div><h3 data-k="s3t" contenteditable>Seal locally</h3><p data-k="s3b" contenteditable>If flagged: write the report (address, issue, snippet) on the agent server. Compute <code>keccak256(report)</code>. Bug text never goes on-chain.</p></div></div>
-    <div class="step" data-slide="step"><div class="n">4</div><div><h3 data-k="s4t" contenteditable>File on HSK</h3><p data-k="s4b" contenteditable>Agent wallet sends a tx to the Registry on HashKey (testnet 133): <code>contractAddress, reportHash, severity, state = SEALED</code>. Event <code>SealedReport(contract, owner, reportHash)</code>. The explorer shows a sealed report was filed — no bug text in the tx.</p></div></div>
-    <div class="step" data-slide="step"><div class="n">5</div><div><h3 data-k="s5t" contenteditable>Public warning — the public good</h3><p data-k="s5b" contenteditable>The warning isn't on their bytecode or a Blockscout sticker. It's <code>reports[0xABC]</code> in the registry. Any UI, agent or dapp calls <code>hasSealedReport(0xABC)</code> and can refuse to touch it. Users are protected even if the owner never reads the writeup.</p></div></div>
-    <div class="step" data-slide="step"><div class="n">6</div><div><h3 data-k="s6t" contenteditable>Optional nudge</h3><p data-k="s6b" contenteditable>A 0 HSK tx to the owner EOA (never into the bad contract), or a ping: “this address has a sealed report, open the page.” Still no bug text.</p></div></div>
-    <div class="step" data-slide="step"><div class="n">7</div><div><h3 data-k="s7t" contenteditable>Owner unlocks (pull)</h3><p data-k="s7b" contenteditable>Owner opens the site, connects the wallet that is <code>owner()</code> / proxy admin / Safe, signs. Server checks HSK. Match → the report renders on that page. Wrong wallet → nothing. Wallets have no inbox; this page is the delivery.</p></div></div>
-    <div class="step" data-slide="step"><div class="n">8</div><div><h3 data-k="s8t" contenteditable>Ack</h3><p data-k="s8b" contenteditable>Owner can <code>ack(reportId)</code> from that wallet: <code>SEALED → ACKED</code>. The flag stays until they ack. The exploit is never published.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">1</div><div><h3 data-k="s1t" contenteditable>Watch</h3><p data-k="s1b" contenteditable>Agent polls HSK Blockscout for newly verified contracts. For each one it notes deployer, <code>owner()</code>, proxy implementation, and obvious bytecode clones of known tokens.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">2</div><div><h3 data-k="s2t" contenteditable>Check</h3><p data-k="s2b" contenteditable>A few automatic, checkable rules on source — missing access control, <code>tx.origin</code>, unlocked <code>selfdestruct</code>. Not a real audit. Flag or skip.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">3</div><div><h3 data-k="s3t" contenteditable>Seal locally</h3><p data-k="s3b" contenteditable>If flagged: write the report (address, issue, snippet) on the agent server. Compute <code>keccak256(report)</code>. Bug text never goes on-chain.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">4</div><div><h3 data-k="s4t" contenteditable>File on HSK</h3><p data-k="s4b" contenteditable>Agent wallet sends a tx to the Registry on HashKey (testnet 133): <code>contractAddress, reportHash, severity, state = SEALED</code>. Event <code>SealedReport(contract, owner, reportHash)</code>. The explorer shows a sealed report was filed — no bug text in the tx.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">5</div><div><h3 data-k="s5t" contenteditable>Public warning — the public good</h3><p data-k="s5b" contenteditable>The warning isn't on their bytecode or a Blockscout sticker. It's <code>reports[0xABC]</code> in the registry. Any UI, agent or dapp calls <code>hasSealedReport(0xABC)</code> and can refuse to touch it. Users are protected even if the owner never reads the writeup.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">6</div><div><h3 data-k="s6t" contenteditable>Optional nudge</h3><p data-k="s6b" contenteditable>A 0 HSK tx to the owner EOA (never into the bad contract), or a ping: “this address has a sealed report, open the page.” Still no bug text.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">7</div><div><h3 data-k="s7t" contenteditable>Owner unlocks (pull)</h3><p data-k="s7b" contenteditable>Owner opens the site, connects the wallet that is <code>owner()</code> / proxy admin / Safe, signs. Server checks HSK. Match → the report renders on that page. Wrong wallet → nothing. Wallets have no inbox; this page is the delivery.</p></div></div>
+    <div class="step blk" data-slide="step"><div class="n">8</div><div><h3 data-k="s8t" contenteditable>Ack</h3><p data-k="s8b" contenteditable>Owner can <code>ack(reportId)</code> from that wallet: <code>SEALED → ACKED</code>. The flag stays until they ack. The exploit is never published.</p></div></div>
   </div>
 </section>
 
-<section data-slide="close" style="border:none">
+<section class="blk" data-slide="close" style="border:none">
   <h2 data-k="h_close" contenteditable>Why it matters</h2>
   <div class="card"><p data-k="close" contenteditable style="margin:0">Disclosure today is a DM into the void or a public dump. This makes the warning machine-readable and on-chain, and the writeup private to the only wallet that can fix it.</p></div>
   <p class="foot" data-k="foot" contenteditable>HSK Contract Watchdog · HashKey Chain testnet 133</p>
@@ -95,87 +114,122 @@ body.tv #tv{display:grid}
   <button id="b-edit">Edit: on</button>
   <button id="b-prev">Preview</button>
   <button id="b-tv">TV mode</button>
-  <button id="b-save">Export HTML</button>
+  <button id="b-add">+ Step</button>
+  <button id="b-save">Save</button>
+  <button id="b-export">Export HTML</button>
   <button id="b-reset">Reset</button>
-  <span class="p" id="hint">⌘S export · P preview · T tv</span>
+  <span class="p">⌘S save · P preview · T tv</span>
 </div>
-<div id="tv"><div id="stage"></div></div>
+<div id="toast"></div>
+<div id="count"></div>
 <div id="progress" style="width:0"></div>
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const KEY='hsk-watchdog-v1', q=new URLSearchParams(location.search);
-const els=()=>$$('[data-k]');
+const blocks=()=>$$('#page .blk');
 
-// ---- persistence
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');els().forEach(e=>{if(d[e.dataset.k]!=null)e.innerHTML=d[e.dataset.k]})}catch(e){}}
-function save(){const d={};els().forEach(e=>d[e.dataset.k]=e.innerHTML);localStorage.setItem(KEY,JSON.stringify(d))}
-load();
-document.addEventListener('input',e=>{if(e.target.closest('[data-k]'))save()});
-
-// ---- modes
-let mode = q.get('mode') || (q.has('preview')?'preview':q.has('tv')?'tv':'edit');
-function setMode(m,push=true){
-  mode=m;
-  const edit = m==='edit';
-  els().forEach(e=>e.contentEditable=edit?'true':'false');
-  document.body.classList.toggle('tv', m==='tv');
-  $('#b-edit').textContent='Edit: '+(edit?'on':'off');
-  $('#bar').classList.toggle('hidden', m!=='edit'&&m!=='preview');
-  if(m==='tv'){buildSlides();show(0)} else {$('#progress').style.width='0'}
-  if(push){const u=new URL(location);m==='edit'?u.searchParams.delete('mode'):u.searchParams.set('mode',m);history.replaceState({},'',u)}
-}
-$('#b-edit').onclick=()=>setMode(mode==='edit'?'preview':'edit');
-$('#b-prev').onclick=()=>setMode('preview');
-$('#b-tv').onclick=()=>setMode('tv');
-$('#b-reset').onclick=()=>{if(confirm('Discard local edits and reload the published version?')){localStorage.removeItem(KEY);location.reload()}};
-
-// ---- export: full standalone html with current text baked in
-$('#b-save').onclick=()=>{
-  const c=document.documentElement.cloneNode(true);
+/* ---------- persistence: whole page, so removals + additions stick ---------- */
+function clean(node){const c=node.cloneNode(true);
+  c.querySelectorAll('.ctl').forEach(e=>e.remove());
+  c.querySelectorAll('.current').forEach(e=>e.classList.remove('current'));
   c.querySelectorAll('[contenteditable]').forEach(e=>e.setAttribute('contenteditable','true'));
-  c.querySelector('#progress').style.width='0';
-  c.querySelector('#stage').innerHTML='';
-  c.classList.remove('tv');
-  const html='<!doctype html>\n'+c.outerHTML;
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-  a.download='index.html';a.click();
+  return c}
+function save(quiet){localStorage.setItem(KEY,clean($('#page')).innerHTML); if(!quiet)toast('Saved on this device');}
+function load(){const v=localStorage.getItem(KEY); if(!v)return;
+  if(v.trim()[0]==='{'){try{const d=JSON.parse(v);$$('[data-k]').forEach(e=>{if(d[e.dataset.k]!=null)e.innerHTML=d[e.dataset.k]})}catch(e){} return}
+  $('#page').innerHTML=v}
+load();
+let deb;document.addEventListener('input',e=>{if(e.target.closest('#page')){clearTimeout(deb);deb=setTimeout(()=>save(true),400)}});
+function toast(m){const el=$('#toast');el.textContent=m;el.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('on'),1600)}
+
+/* ---------- per-block controls: move / remove ---------- */
+function renumber(){$$('#steps .step .n').forEach((n,i)=>n.textContent=i+1)}
+function controls(){
+  $$('.ctl').forEach(e=>e.remove());
+  if(mode!=='edit')return;
+  blocks().forEach(b=>{
+    const c=document.createElement('div');c.className='ctl';c.contentEditable='false';
+    c.innerHTML='<button data-a="up" title="Move up">&uarr;</button><button data-a="down" title="Move down">&darr;</button><button class="del" data-a="del">Remove</button>';
+    c.addEventListener('click',e=>{const a=e.target.dataset.a;if(!a)return;e.stopPropagation();
+      if(a==='del'){if(!confirm('Remove this section?'))return;b.remove()}
+      else if(a==='up'){const p=b.previousElementSibling;if(p&&p.classList.contains('blk'))b.parentNode.insertBefore(b,p)}
+      else if(a==='down'){const n=b.nextElementSibling;if(n&&n.classList.contains('blk'))b.parentNode.insertBefore(n,b)}
+      renumber();save();});
+    b.prepend(c);});
+}
+$('#b-add').onclick=()=>{
+  const d=document.createElement('div');d.className='step blk';d.dataset.slide='step';
+  d.innerHTML='<div class="n">•</div><div><h3 contenteditable="true">New step</h3><p contenteditable="true">Describe it.</p></div>';
+  $('#steps').appendChild(d);renumber();controls();save(true);
+  d.querySelector('h3').focus();d.scrollIntoView({block:'center',behavior:'smooth'});
 };
 
-// ---- TV / presentation
-let slides=[],i=0;
-const txt=el=>el?el.innerHTML:'';
-function buildSlides(){
-  slides=[];
-  slides.push({tag:txt($('[data-k=tag]')),h1:txt($('[data-k=title]')),p:txt($('[data-k=lede]')),sub:txt($('[data-k=kicker]'))});
-  slides.push({tag:'Boundaries',h2:txt($('[data-k=h_scope]')),p:txt($('[data-k=scope]'))});
-  for(let n=1;n<=8;n++)slides.push({tag:'Step '+n+' of 8',h2:txt($('[data-k=s'+n+'t]')),p:txt($('[data-k=s'+n+'b]'))});
-  slides.push({tag:'Close',h2:txt($('[data-k=h_close]')),p:txt($('[data-k=close]'))});
+/* ---------- modes ---------- */
+let mode = q.get('mode') || (q.has('preview')?'preview':q.has('tv')?'tv':'edit');
+let editable = true, i = 0;
+function applyEditable(){const on = editable && mode!=='preview';
+  $$('#page [contenteditable]').forEach(e=>e.contentEditable=on?'true':'false');
+  document.body.classList.toggle('editing', on);
+  $('#b-edit').textContent='Edit: '+(on?'on':'off');}
+function setMode(m,push=true){
+  mode=m;
+  if(m==='preview')editable=false; if(m==='edit')editable=true;
+  document.body.classList.toggle('tv', m==='tv');
+  applyEditable(); controls();
+  $('#bar').classList.toggle('hidden', m==='preview');
+  if(m==='tv'){$('#b-tv').textContent='Exit TV';show(i)}
+  else{$('#b-tv').textContent='TV mode';blocks().forEach(b=>b.classList.remove('current'));$('#progress').style.width='0'}
+  if(push){const u=new URL(location);m==='edit'?u.searchParams.delete('mode'):u.searchParams.set('mode',m);history.replaceState({},'',u)}
 }
+$('#b-edit').onclick=()=>{editable=!editable;if(mode==='preview')mode='edit';applyEditable();controls();};
+$('#b-prev').onclick=()=>setMode(mode==='preview'?'edit':'preview');
+$('#b-tv').onclick=()=>setMode(mode==='tv'?'edit':'tv');
+$('#b-save').onclick=()=>save();
+$('#b-reset').onclick=()=>{if(confirm('Discard local edits and reload the published version?')){localStorage.removeItem(KEY);location.reload()}};
+
+/* ---------- export a standalone index.html with the current page baked in ---------- */
+$('#b-export').onclick=()=>{
+  const c=document.documentElement.cloneNode(true);
+  c.querySelectorAll('.ctl').forEach(e=>e.remove());
+  c.querySelectorAll('.current').forEach(e=>e.classList.remove('current'));
+  c.querySelectorAll('[contenteditable]').forEach(e=>e.setAttribute('contenteditable','true'));
+  c.querySelector('body').className='';
+  c.querySelector('#progress').setAttribute('style','width:0');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['<!doctype html>\n'+c.outerHTML],{type:'text/html'}));
+  a.download='index.html';a.click();toast('Exported — commit it to publish');
+};
+
+/* ---------- presentation: shows the real blocks, so slides stay editable ---------- */
 function show(n){
-  i=Math.max(0,Math.min(slides.length-1,n));const s=slides[i];
-  $('#stage').innerHTML=`<div class="s-tag">${s.tag}</div><div class="rule"></div>`+
-    (s.h1?`<h1>${s.h1}</h1>`:'')+(s.h2?`<h2>${s.h2}</h2>`:'')+
-    (s.p?`<p>${s.p}</p>`:'')+(s.sub?`<p class="big" style="color:#8b98a6">${s.sub}</p>`:'')+
-    `<div class="num">${i+1} / ${slides.length}</div>`;
-  $('#progress').style.width=((i+1)/slides.length*100)+'%';
+  const b=blocks(); if(!b.length)return;
+  i=(n+b.length)%b.length;
+  b.forEach((el,k)=>el.classList.toggle('current',k===i));
+  $('#count').textContent=(i+1)+' / '+b.length;
+  $('#progress').style.width=((i+1)/b.length*100)+'%';
+  b[i].scrollTop=0;
 }
 document.addEventListener('keydown',e=>{
   const typing=document.activeElement&&document.activeElement.isContentEditable;
-  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();$('#b-save').click();return}
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();save();return}
   if(mode==='tv'){
+    if(e.key==='Escape'){e.preventDefault();setMode('edit');return}
+    if(e.key.toLowerCase()==='f'&&!typing){document.documentElement.requestFullscreen?.();return}
+    if(typing)return;                       // arrows edit text while a slide is focused
     if(['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();show(i+1)}
     if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();show(i-1)}
-    if(e.key==='Escape')setMode('preview');
-    if(e.key.toLowerCase()==='f')document.documentElement.requestFullscreen?.();
     return;
   }
   if(typing)return;
   if(e.key.toLowerCase()==='t')setMode('tv');
   if(e.key.toLowerCase()==='p')setMode(mode==='preview'?'edit':'preview');
 });
-$('#tv').onclick=e=>{show(i+ (e.clientX < innerWidth*0.25 ? -1 : 1))};
+document.addEventListener('click',e=>{                      // click the empty margins to advance
+  if(mode!=='tv')return;
+  if(e.target.closest('#page .blk')||e.target.closest('#bar'))return;
+  show(e.clientX<innerWidth*0.25?i-1:i+1);
+});
 setMode(mode,false);
 </script>
 </body>
